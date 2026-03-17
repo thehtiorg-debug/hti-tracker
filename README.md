@@ -1,2 +1,2 @@
-# hti-tracker
+# hti-paylink
 HTI Payment Tracker
