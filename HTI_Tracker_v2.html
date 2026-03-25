@@ -1121,8 +1121,13 @@ function switchGroupTab(gid, el) {
 function renderActiveGroup() {
   if (!activeGroupId || !data.groups[activeGroupId]) return;
   const g = data.groups[activeGroupId];
-  const searchVal = document.getElementById('group-search').value.toLowerCase();
-  const members = g.members.filter(m => m.name.toLowerCase().includes(searchVal) || (m.phone && m.phone.replace(/\D/g,'').includes(searchVal.replace(/\D/g,''))));
+  const searchVal = document.getElementById('group-search').value.toLowerCase().trim();
+  const searchDigits = searchVal.replace(/\D/g, '');
+  const members = g.members.filter(m => {
+    const nameMatch = m.name.toLowerCase().includes(searchVal);
+    const phoneMatch = searchDigits.length > 0 && m.phone && m.phone.replace(/\D/g,'').includes(searchDigits);
+    return nameMatch || phoneMatch;
+  });
   const container = document.getElementById('group-member-list');
   const isOwner = currentUser.role === 'owner';
   const canPay = isOwner || (currentUser.permissions && currentUser.permissions.payment);
