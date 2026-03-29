@@ -549,7 +549,7 @@
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <div class="card-title" style="margin-bottom:0;">📋 Activity Log</div>
-          <button class="btn-small" id="clear-log-btn" style="background:#fee2e2;color:var(--red);" onclick="clearLog()">🗑 মুছুন</button>
+          <button class="btn-small" id="clear-log-btn" style="background:#fee2e2;color:var(--red);display:none;" onclick="clearLog()">🗑 মুছুন</button>
         </div>
         <div id="activity-log-list"></div>
       </div>
@@ -558,9 +558,9 @@
     <!-- REPORT PAGE -->
     <div class="page" id="page-report">
 
-      <!-- মোট Collection -->
+      <!-- আমার Group-এর সর্বমোট হিসাব -->
       <div class="card" style="background:linear-gradient(135deg,#0f4424,#1a6b3a);color:white;margin-bottom:12px;">
-        <div style="font-size:14px;font-weight:700;color:var(--gold-light);margin-bottom:12px;">💰 সর্বমোট হিসাব (শুরু থেকে আজ পর্যন্ত)</div>
+        <div style="font-size:13px;font-weight:700;color:var(--gold-light);margin-bottom:12px;">💰 আমার Group-এর সর্বমোট হিসাব (শুরু থেকে আজ পর্যন্ত)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:22px;font-weight:700;color:var(--gold-light);" id="rpt-total-collected">₹0</div>
@@ -581,21 +581,31 @@
         </div>
       </div>
 
-      <!-- সবচেয়ে বেশি বকেয়া Top 3 -->
+      <!-- বকেয়া সদস্য তালিকা -->
       <div class="card" style="margin-bottom:12px;">
         <div class="card-title">⚠️ বকেয়া সদস্য তালিকা (বেশি থেকে কম)</div>
         <div id="rpt-top-due"></div>
       </div>
 
-      <!-- নিয়মিত member -->
+      <!-- নিয়মিত সদস্য -->
       <div class="card" style="margin-bottom:12px;">
         <div class="card-title">🏆 নিয়মিত সদস্য (কখনো বকেয়া রাখেননি)</div>
         <div id="rpt-regular-members"></div>
       </div>
 
-      <!-- মাস অনুযায়ী collection history -->
+      <!-- মাসিক Collection ইতিহাস — Date Range -->
       <div class="card" style="margin-bottom:12px;">
         <div class="card-title">📅 মাসিক Collection ইতিহাস</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:4px;">শুরুর মাস</div>
+            <select class="form-select" id="rpt-from-month" onchange="renderMonthlyHistory()" style="padding:8px 10px;font-size:12px;"></select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:4px;">শেষের মাস</div>
+            <select class="form-select" id="rpt-to-month" onchange="renderMonthlyHistory()" style="padding:8px 10px;font-size:12px;"></select>
+          </div>
+        </div>
         <div id="rpt-monthly-history"></div>
       </div>
 
@@ -1061,7 +1071,7 @@ function showPage(name, el) {
   if (name === 'whatsapp') { buildWAGroupSelect(); updateWAPreview(); }
   if (name === 'admin') renderAdminPage();
   if (name === 'log') renderLog();
-  if (name === 'report') renderReport();
+  if (name === 'report') { initReportDateRange(); renderReport(); }
 }
 
 // ========== DASHBOARD ==========
@@ -1192,15 +1202,16 @@ function openDashDetail(type) {
         const waMsg = buildPersonalMessage(member, m.rate);
         const waUrl = m.phone ? `https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}` : null;
         const medalColor = i === 0 ? '#dc2626' : i === 1 ? '#f59e0b' : i === 2 ? '#6b7280' : '#d1d5db';
+        const canSendReminder = canEditGroup(m.gid);
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
           <div style="width:26px;height:26px;border-radius:50%;background:${medalColor};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;">${i+1}</div>
           <div style="flex:1;">
             <div style="font-size:14px;font-weight:600;">${m.name}</div>
-            <div style="font-size:11px;color:var(--gray);">${m.group} • ${m.months} মাস বকেয়া</div>
+            <div style="font-size:11px;color:var(--gray);">${m.group} • ${m.months} মাস বকেয়া • ₹${m.amount}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
             <div style="font-size:13px;font-weight:700;color:var(--red);">₹${m.amount}</div>
-            ${waUrl ? `<button onclick="window.open('${waUrl}','_blank')" style="background:#25D366;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;">📲 Reminder</button>` : '<span style="font-size:9px;color:var(--gray);">নম্বর নেই</span>'}
+            ${canSendReminder ? (waUrl ? `<button onclick="window.open('${waUrl}','_blank')" style="background:#25D366;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;">📲 Reminder</button>` : '<span style="font-size:9px;color:var(--gray);">নম্বর নেই</span>') : '<span style="font-size:9px;color:#d1d5db;">—</span>'}
           </div>
         </div>`;
       }).join('');
@@ -1220,8 +1231,9 @@ let activeGroupId = null;
 
 function buildGroupTabsBar() {
   const bar = document.getElementById('group-tabs-bar');
-  const gids = Object.keys(data.groups);
-  if (!activeGroupId || !data.groups[activeGroupId]) activeGroupId = gids[0];
+  const assigned = getAssignedGroups();
+  const gids = Object.keys(data.groups).filter(gid => assigned.includes(gid));
+  if (!activeGroupId || !data.groups[activeGroupId] || !gids.includes(activeGroupId)) activeGroupId = gids[0];
   bar.innerHTML = gids.map(gid => {
     const g = data.groups[gid];
     return `<button class="dyn-gtab${gid === activeGroupId ? ' active' : ''}" onclick="switchGroupTab('${gid}',this)">${g.name}</button>`;
@@ -1236,12 +1248,18 @@ function switchGroupTab(gid, el) {
   renderActiveGroup();
 }
 
+// Helper: return list of groups this user can access
+function getAssignedGroups() {
+  if (currentUser.role === 'owner') return Object.keys(data.groups);
+  const assigned = currentUser.groupAccess || [];
+  if (assigned.length === 0) return Object.keys(data.groups); // legacy admin
+  return assigned;
+}
+
 function canEditGroup(gid) {
   if (currentUser.role === 'owner') return true;
-  const p = currentUser.permissions || {};
-  // Admin-এর assigned groups check করো
   const assignedGroups = currentUser.groupAccess || [];
-  if (assignedGroups.length === 0) return true; // পুরনো admin — সব group
+  if (assignedGroups.length === 0) return true; // legacy admin
   return assignedGroups.includes(gid);
 }
 
@@ -1554,8 +1572,11 @@ function closeDetailModal() { document.getElementById('detail-modal').classList.
 // ========== ADD MEMBER ==========
 function populateAddForm() {
   const sel = document.getElementById('new-group');
+  const assignedGroups = getAssignedGroups();
   sel.innerHTML = '<option value="">-- Group বেছে নিন --</option>' +
-    Object.entries(data.groups).map(([gid, g]) => `<option value="${gid}">${g.name} (₹${g.rate}/মাস)</option>`).join('');
+    Object.entries(data.groups)
+      .filter(([gid]) => assignedGroups.includes(gid))
+      .map(([gid, g]) => `<option value="${gid}">${g.name} (₹${g.rate}/মাস)</option>`).join('');
 
   const smSel = document.getElementById('new-start-month');
   smSel.innerHTML = '';
@@ -1822,8 +1843,15 @@ function deleteAdmin() {
 // ========== WHATSAPP ==========
 function buildWAGroupSelect() {
   const sel = document.getElementById('wa-group');
-  sel.innerHTML = '<option value="all">সবাইকে (সব Group)</option>' +
-    Object.entries(data.groups).map(([gid, g]) => `<option value="${gid}">${g.name}</option>`).join('');
+  const assigned = getAssignedGroups();
+  const isOwner = currentUser.role === 'owner';
+  const allGroupsAccess = isOwner || assigned.length === Object.keys(data.groups).length;
+  sel.innerHTML = (allGroupsAccess ? '<option value="all">সবাইকে (সব Group)</option>' : '') +
+    Object.entries(data.groups)
+      .filter(([gid]) => assigned.includes(gid))
+      .map(([gid, g]) => `<option value="${gid}">${g.name}</option>`).join('');
+  // Default to first assigned group if not owner
+  if (!allGroupsAccess && sel.options.length > 0) sel.selectedIndex = 0;
 }
 
 function buildPersonalMessage(m, rate) {
@@ -1884,12 +1912,18 @@ function updateWAPreview() {
   const waGroup = document.getElementById('wa-group').value;
   const waFilter = document.getElementById('wa-filter').value;
 
+  const assigned = getAssignedGroups();
   let members = [];
   if (waGroup === 'all') {
-    Object.entries(data.groups).forEach(([gid, g]) => members.push(...g.members.map(m => ({ ...m, _gid: gid, _rate: g.rate }))));
+    Object.entries(data.groups)
+      .filter(([gid]) => assigned.includes(gid))
+      .forEach(([gid, g]) => members.push(...g.members.map(m => ({ ...m, _gid: gid, _rate: g.rate }))));
   } else {
-    const g = data.groups[waGroup];
-    members = g.members.map(m => ({ ...m, _gid: waGroup, _rate: g.rate }));
+    if (!assigned.includes(waGroup)) { members = []; }
+    else {
+      const g = data.groups[waGroup];
+      members = g.members.map(m => ({ ...m, _gid: waGroup, _rate: g.rate }));
+    }
   }
   if (waFilter === 'due') members = members.filter(m => !hasPaidThisMonth(m));
 
@@ -1937,11 +1971,12 @@ function updateWAPreview() {
 
 // ========== REPORT ==========
 function renderReport() {
-  const allMembers = getAllMembers();
-  let totalCollected = 0, totalDue = 0, totalMonths = 0, totalSurplus = 0;
+  const assigned = getAssignedGroups();
+  const filteredGroups = Object.entries(data.groups).filter(([gid]) => assigned.includes(gid));
 
-  // Calculate totals
-  for (const [gid, g] of Object.entries(data.groups)) {
+  // ---- 1. সর্বমোট হিসাব box ----
+  let totalCollected = 0, totalDue = 0, totalMonths = 0, totalSurplus = 0;
+  for (const [gid, g] of filteredGroups) {
     g.members.forEach(m => {
       const paidMonths = (m.payments || []).filter(k => k <= getMonthKey(currentYear, currentMonth));
       const unpaid = getUnpaidMonths(m, g.rate);
@@ -1951,57 +1986,77 @@ function renderReport() {
       totalSurplus += m.surplusBalance || 0;
     });
   }
-
   document.getElementById('rpt-total-collected').textContent = '₹' + totalCollected;
   document.getElementById('rpt-total-due').textContent = '₹' + totalDue;
   document.getElementById('rpt-total-months').textContent = totalMonths;
   document.getElementById('rpt-total-surplus').textContent = '₹' + totalSurplus;
 
-  // Group-wise সব বকেয়া member — বেশি থেকে কম
+  // ---- 2. বকেয়া list (বেশি থেকে কম) ----
   const topDueEl = document.getElementById('rpt-top-due');
-  let topDueHTML = '';
-  let anyDue = false;
-  for (const [gid, g] of Object.entries(data.groups)) {
-    const dueList = [];
-    g.members.forEach(m => {
-      const unpaid = getUnpaidMonths(m, g.rate);
-      if (unpaid.length > 0) dueList.push({ name: m.name, phone: m.phone, gid, group: g.name, rate: g.rate, months: unpaid.length, amount: unpaid.length * g.rate, id: m.id });
-    });
-    dueList.sort((a, b) => b.amount - a.amount);
-    if (dueList.length > 0) {
-      anyDue = true;
-      topDueHTML += `<div style="margin-bottom:14px;">
-        <div style="font-size:13px;font-weight:700;color:var(--green-dark);padding:6px 10px;background:#f0fdf4;border-radius:8px;margin-bottom:8px;">📌 ${g.name} — ${dueList.length} জন বকেয়া</div>
-        ${dueList.map((m, i) => {
-          const cleanPhone = (m.phone || '').replace(/\D/g,'').replace(/^0+/,'');
-          const waPhone = cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone;
-          const waMsg = buildPersonalMessage(g.members.find(mem=>mem.id===m.id), g.rate);
-          const waUrl = m.phone ? 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(waMsg) : null;
-          const medalColor = i === 0 ? '#dc2626' : i === 1 ? '#f59e0b' : i === 2 ? '#6b7280' : '#d1d5db';
-          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
-            <div style="width:28px;height:28px;border-radius:50%;background:${medalColor};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">${i+1}</div>
-            <div style="flex:1;">
-              <div style="font-size:14px;font-weight:600;">${m.name}</div>
-              <div style="font-size:11px;color:var(--gray);">${m.phone ? '📱 ' + m.phone : 'নম্বর নেই'} • ${m.months} মাস বকেয়া</div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-              <div style="font-size:13px;font-weight:700;color:var(--red);">₹${m.amount}</div>
-              ${waUrl ? `<button onclick="window.open('${waUrl}','_blank')" style="background:#25D366;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;">📲 Reminder</button>` : '<span style="font-size:9px;color:var(--gray);">নম্বর নেই</span>'}
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
-    }
-  }
-  if (!anyDue) {
-    topDueEl.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:10px;">কেউ বকেয়া নেই! আলহামদুলিল্লাহ ✅</div>';
-  } else {
-    topDueEl.innerHTML = topDueHTML;
+  const isOwnerView = currentUser.role === 'owner';
+
+  function buildDueRow(m, i) {
+    const cleanPhone = (m.phone || '').replace(/\D/g,'').replace(/^0+/,'');
+    const waPhone = cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone;
+    const hasPhone = !!m.phone;
+    const medalColor = i === 0 ? '#dc2626' : i === 1 ? '#f59e0b' : i === 2 ? '#6b7280' : '#d1d5db';
+    const onCooldown = isReminderOnCooldown(m.id);
+    const reminderBtn = hasPhone
+      ? (onCooldown
+          ? '<span style="font-size:9px;color:var(--gray);">⏳ পাঠানো হয়েছে</span>'
+          : `<button onclick="sendReminderFromReport('${m.gid}','${m.id}')" style="background:#25D366;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;">📲 Reminder</button>`)
+      : '<span style="font-size:9px;color:var(--gray);">নম্বর নেই</span>';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${medalColor};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">${i+1}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${m.name}</div>
+        <div style="font-size:11px;color:var(--gray);">${isOwnerView ? '' : m.group + ' • '}${m.months} মাস বকেয়া</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div style="font-size:13px;font-weight:700;color:var(--red);">₹${m.amount}</div>
+        ${reminderBtn}
+      </div>
+    </div>`;
   }
 
-  // নিয়মিত member
+  if (isOwnerView) {
+    // Owner — group-wise দেখাবে
+    let ownerHTML = '';
+    let anyDueOwner = false;
+    for (const [gid, g] of Object.entries(data.groups)) {
+      let groupDue = [];
+      g.members.forEach(m => {
+        const unpaid = getUnpaidMonths(m, g.rate);
+        if (unpaid.length > 0) groupDue.push({ name: m.name, phone: m.phone, gid, id: m.id, group: g.name, rate: g.rate, months: unpaid.length, amount: unpaid.length * g.rate });
+      });
+      groupDue.sort((a, b) => b.amount - a.amount);
+      if (groupDue.length > 0) {
+        anyDueOwner = true;
+        ownerHTML += `<div style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:700;color:var(--green-dark);padding:6px 10px;background:#f0fdf4;border-radius:8px;margin-bottom:8px;">📌 ${g.name} — ${groupDue.length} জন বকেয়া</div>
+          ${groupDue.map((m, i) => buildDueRow(m, i)).join('')}
+        </div>`;
+      }
+    }
+    topDueEl.innerHTML = anyDueOwner ? ownerHTML : '<div style="text-align:center;color:var(--gray);font-size:13px;padding:10px;">কেউ বকেয়া নেই! আলহামদুলিল্লাহ ✅</div>';
+  } else {
+    // Admin — assigned groups, সব একসাথে বেশি থেকে কম
+    let allDue = [];
+    for (const [gid, g] of filteredGroups) {
+      g.members.forEach(m => {
+        const unpaid = getUnpaidMonths(m, g.rate);
+        if (unpaid.length > 0) allDue.push({ name: m.name, phone: m.phone, gid, id: m.id, group: g.name, rate: g.rate, months: unpaid.length, amount: unpaid.length * g.rate });
+      });
+    }
+    allDue.sort((a, b) => b.amount - a.amount);
+    topDueEl.innerHTML = allDue.length === 0
+      ? '<div style="text-align:center;color:var(--gray);font-size:13px;padding:10px;">কেউ বকেয়া নেই! আলহামদুলিল্লাহ ✅</div>'
+      : allDue.map((m, i) => buildDueRow(m, i)).join('');
+  }
+
+  // ---- 3. নিয়মিত সদস্য ----
   const regularMembers = [];
-  for (const [gid, g] of Object.entries(data.groups)) {
+  for (const [gid, g] of filteredGroups) {
     g.members.forEach(m => {
       const unpaid = getUnpaidMonths(m, g.rate);
       if (unpaid.length === 0 && (m.payments || []).length > 0) {
@@ -2009,7 +2064,6 @@ function renderReport() {
       }
     });
   }
-
   const regularEl = document.getElementById('rpt-regular-members');
   if (regularMembers.length === 0) {
     regularEl.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:13px;padding:10px;">এখনো কোনো নিয়মিত সদস্য নেই।</div>';
@@ -2025,34 +2079,98 @@ function renderReport() {
       </div>`).join('');
   }
 
-  // মাসিক collection history (last 12 months)
+  // ---- 4. মাসিক Collection ইতিহাস (date range) ----
+  renderMonthlyHistory();
+}
+
+function sendReminderFromReport(gid, memberId) {
+  const g = data.groups[gid];
+  const member = g.members.find(m => m.id === memberId);
+  if (!member || !member.phone) return;
+  const cleanPhone = member.phone.replace(/\D/g,'').replace(/^0+/,'');
+  const waPhone = cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone;
+  const waMsg = buildPersonalMessage(member, g.rate);
+  const waUrl = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(waMsg);
+  markReminderSent(memberId);
+  window.open(waUrl, '_blank');
+  renderReport();
+}
+
+function renderMonthlyHistory() {
+  const assigned = getAssignedGroups();
+  const filteredGroups = Object.entries(data.groups).filter(([gid]) => assigned.includes(gid));
+
+  const fromSel = document.getElementById('rpt-from-month');
+  const toSel = document.getElementById('rpt-to-month');
+  if (!fromSel || !toSel) return;
+
+  const fromKey = fromSel.value;
+  const toKey = toSel.value;
+
+  // Build list of months in range
+  const [fy, fm] = fromKey.split('-').map(Number);
+  const [ty, tm] = toKey.split('-').map(Number);
+
   const monthlyEl = document.getElementById('rpt-monthly-history');
-  const monthlyData = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(currentYear, currentMonth - i, 1);
-    const key = getMonthKey(d.getFullYear(), d.getMonth());
+  const monthsInRange = [];
+  let y = fy, m = fm;
+  while (y < ty || (y === ty && m <= tm)) {
+    monthsInRange.push(getMonthKey(y, m - 1));
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+
+  if (monthsInRange.length === 0) {
+    monthlyEl.innerHTML = '<div style="text-align:center;color:var(--gray);font-size:12px;">তারিখ সঠিকভাবে বেছে নিন।</div>';
+    return;
+  }
+
+  const monthlyData = monthsInRange.map(key => {
+    const [ky, km] = key.split('-').map(Number);
     let collected = 0;
-    for (const [gid, g] of Object.entries(data.groups)) {
-      g.members.forEach(m => {
-        if (m.payments && m.payments.includes(key)) collected += g.rate;
+    for (const [gid, g] of filteredGroups) {
+      g.members.forEach(mem => {
+        if (mem.payments && mem.payments.includes(key)) collected += g.rate;
       });
     }
-    monthlyData.push({ key, label: MONTHS[d.getMonth()].substring(0,3) + ' ' + d.getFullYear(), collected });
-  }
+    return { key, label: MONTHS[km - 1].substring(0, 3) + ' ' + ky, collected };
+  });
 
   const maxCollected = Math.max(...monthlyData.map(m => m.collected), 1);
   monthlyEl.innerHTML = monthlyData.map(m => `
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
       <div style="font-size:11px;color:var(--gray);width:60px;flex-shrink:0;">${m.label}</div>
       <div style="flex:1;background:#f3f4f6;border-radius:6px;height:20px;overflow:hidden;">
-        <div style="height:100%;background:${m.collected > 0 ? 'linear-gradient(90deg,var(--green),var(--green-light))' : '#e5e7eb'};border-radius:6px;width:${Math.round(m.collected/maxCollected*100)}%;transition:width 0.5s;"></div>
+        <div style="height:100%;background:${m.collected > 0 ? 'linear-gradient(90deg,var(--green),var(--green-light))' : '#e5e7eb'};border-radius:6px;width:${Math.round(m.collected / maxCollected * 100)}%;transition:width 0.5s;"></div>
       </div>
-      <div style="font-size:12px;font-weight:600;color:var(--green-dark);width:50px;text-align:right;">₹${m.collected}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--green-dark);width:55px;text-align:right;">₹${m.collected}</div>
     </div>`).join('');
+}
+
+function initReportDateRange() {
+  const fromSel = document.getElementById('rpt-from-month');
+  const toSel = document.getElementById('rpt-to-month');
+  if (!fromSel || !toSel) return;
+  fromSel.innerHTML = '';
+  toSel.innerHTML = '';
+  // Last 24 months
+  for (let i = 23; i >= 0; i--) {
+    const d = new Date(currentYear, currentMonth - i, 1);
+    const key = getMonthKey(d.getFullYear(), d.getMonth());
+    const label = MONTHS[d.getMonth()].substring(0, 3) + ' ' + d.getFullYear();
+    fromSel.innerHTML += `<option value="${key}">${label}</option>`;
+    toSel.innerHTML += `<option value="${key}">${label}</option>`;
+  }
+  // Default: from = 6 months ago, to = current month
+  fromSel.selectedIndex = Math.max(0, fromSel.options.length - 6);
+  toSel.selectedIndex = toSel.options.length - 1;
 }
 
 // ========== ACTIVITY LOG ==========
 function renderLog() {
+  // মুছুন button শুধু owner এর জন্য
+  const clearBtn = document.getElementById('clear-log-btn');
+  if (clearBtn) clearBtn.style.display = currentUser.role === 'owner' ? '' : 'none';
   const el = document.getElementById('activity-log-list');
   if (logData.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="emoji">📋</div><p>কোনো activity নেই।</p></div>';
@@ -2175,6 +2293,21 @@ function clearLog() {
   saveLog();
   renderLog();
   showToast('Log মুছে গেছে।');
+}
+
+// ========== REMINDER COOLDOWN ==========
+const REMINDER_COOLDOWN_MS = 60 * 60 * 1000; // 1 ঘণ্টা
+
+function markReminderSent(memberId) {
+  const key = 'hti_reminder_' + memberId;
+  localStorage.setItem(key, Date.now().toString());
+}
+
+function isReminderOnCooldown(memberId) {
+  const key = 'hti_reminder_' + memberId;
+  const sent = localStorage.getItem(key);
+  if (!sent) return false;
+  return (Date.now() - parseInt(sent)) < REMINDER_COOLDOWN_MS;
 }
 
 // ========== TOAST ==========
