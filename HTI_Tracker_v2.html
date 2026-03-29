@@ -27,6 +27,13 @@
     --radius: 14px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  button, .tab, .gtab, .dyn-gtab, .pay-btn, .del-btn, .wa-btn, .btn-primary, .btn-small, .close-btn, .month-btn, .month-type-tab, .login-btn, .logout-btn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
   body {
     font-family: 'Noto Sans Bengali', sans-serif;
     background: var(--cream);
@@ -394,53 +401,59 @@
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="summary-grid">
-        <div class="sum-card">
-          <div class="num" id="total-members">0</div>
-          <div class="label">মোট সদস্য</div>
-        </div>
-        <div class="sum-card gold">
-          <div class="num" id="total-collected">₹0</div>
-          <div class="label">এই মাসে আদায়</div>
-        </div>
-        <div class="sum-card red">
-          <div class="num" id="total-due">0</div>
-          <div class="label">বাকি আছেন</div>
-        </div>
-        <div class="sum-card blue">
-          <div class="num" id="total-due-amount">₹0</div>
-          <div class="label">মোট বাকি টাকা</div>
+
+      <!-- এই মাসের হিসাব — clickable cards -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:10px;">📅 এই মাসের হিসাব</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="sum-card" onclick="openDashDetail('members')" style="cursor:pointer;">
+            <div class="num" id="total-members">0</div>
+            <div class="label">মোট সদস্য</div>
+            <div style="font-size:10px;color:var(--green);margin-top:3px;">বিস্তারিত দেখুন →</div>
+          </div>
+          <div class="sum-card gold" onclick="openDashDetail('collected')" style="cursor:pointer;">
+            <div class="num" id="total-collected">₹0</div>
+            <div class="label">এই মাসে আদায়</div>
+            <div style="font-size:10px;color:var(--gold);margin-top:3px;">বিস্তারিত দেখুন →</div>
+          </div>
+          <div class="sum-card red" onclick="openDashDetail('due-people')" style="cursor:pointer;">
+            <div class="num" id="total-due">0</div>
+            <div class="label">বাকি আছেন</div>
+            <div style="font-size:10px;color:var(--red);margin-top:3px;">বিস্তারিত দেখুন →</div>
+          </div>
+          <div class="sum-card blue" onclick="openDashDetail('due-amount')" style="cursor:pointer;">
+            <div class="num" id="total-due-amount">₹0</div>
+            <div class="label">মোট বাকি টাকা</div>
+            <div style="font-size:10px;color:#2980b9;margin-top:3px;">বিস্তারিত দেখুন →</div>
+          </div>
         </div>
       </div>
 
-      <!-- Total Collection Card -->
+      <!-- শুরু থেকে আজ পর্যন্ত — clickable cards -->
       <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#0f4424,#1a6b3a);color:white;">
         <div style="font-size:13px;font-weight:700;color:var(--gold-light);margin-bottom:10px;">📈 সর্বমোট Collection (শুরু থেকে আজ পর্যন্ত)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-size:22px;font-weight:700;color:var(--gold-light);" id="grand-total-collected">₹0</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div onclick="openDashDetail('grand-collected')" style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+            <div style="font-size:20px;font-weight:700;color:var(--gold-light);" id="grand-total-collected">₹0</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:3px;">মোট আদায়</div>
+            <div style="font-size:10px;color:var(--gold-light);margin-top:2px;">বিস্তারিত →</div>
           </div>
-          <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-size:22px;font-weight:700;color:#fca5a5;" id="grand-total-due">₹0</div>
+          <div onclick="openDashDetail('grand-due')" style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+            <div style="font-size:20px;font-weight:700;color:#fca5a5;" id="grand-total-due">₹0</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:3px;">মোট বাকি</div>
+            <div style="font-size:10px;color:#fca5a5;margin-top:2px;">বিস্তারিত →</div>
           </div>
           <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-size:22px;font-weight:700;color:#86efac;" id="grand-total-months">0</div>
+            <div style="font-size:20px;font-weight:700;color:#86efac;" id="grand-total-months">0</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:3px;">মোট মাস আদায়</div>
           </div>
           <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-size:22px;font-weight:700;color:#fde68a;" id="grand-surplus">₹0</div>
+            <div style="font-size:20px;font-weight:700;color:#fde68a;" id="grand-surplus">₹0</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:3px;">মোট জমা</div>
           </div>
         </div>
       </div>
 
-      <div id="group-progress-cards"></div>
-      <div class="card">
-        <div class="card-title">⚠️ এই মাসে যারা দেননি</div>
-        <div id="due-list-dashboard"></div>
-      </div>
     </div>
 
     <!-- GROUPS (Dynamic) -->
@@ -570,7 +583,7 @@
 
       <!-- সবচেয়ে বেশি বকেয়া Top 3 -->
       <div class="card" style="margin-bottom:12px;">
-        <div class="card-title">⚠️ সবচেয়ে বেশি বকেয়া — Group-wise Top 3</div>
+        <div class="card-title">⚠️ বকেয়া সদস্য তালিকা (বেশি থেকে কম)</div>
         <div id="rpt-top-due"></div>
       </div>
 
@@ -590,6 +603,17 @@
 
   </div><!-- /content -->
 </div><!-- /main-app -->
+
+<!-- DASHBOARD DETAIL MODAL -->
+<div class="modal-overlay" id="dash-detail-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="dash-detail-title">বিস্তারিত</span>
+      <button class="close-btn" onclick="closeDashDetail()">✕</button>
+    </div>
+    <div id="dash-detail-content"></div>
+  </div>
+</div>
 
 <!-- PAY MODAL -->
 <div class="modal-overlay" id="pay-modal">
@@ -781,22 +805,38 @@ function doLogin() {
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
 
+  // Owner — Drive load লাগবে না
   if (uname === OWNER_CREDS.username && pass === OWNER_CREDS.password) {
     currentUser = { username: uname, role: 'owner', name: OWNER_CREDS.name, permissions: { addMember: true, payment: true, report: true, whatsapp: true, admin: true, deleteAll: true } };
     saveSession(currentUser);
     startApp();
     return;
   }
-  const admin = authData.admins.find(a => a.username === uname && a.password === pass);
-  if (admin) {
-    if (admin.suspended) { errEl.textContent = '❌ আপনার account suspend করা হয়েছে।'; errEl.style.display = 'block'; return; }
-    currentUser = { ...admin, role: admin.role || 'admin' };
-    saveSession(currentUser);
-    startApp();
-    return;
-  }
-  errEl.textContent = '❌ Username বা Password ভুল!';
-  errEl.style.display = 'block';
+
+  // Admin — আগে Drive থেকে latest authData load করো
+  const btn = document.querySelector('.login-btn');
+  btn.textContent = '⏳ যাচাই হচ্ছে...';
+  btn.disabled = true;
+
+  loadFromDrive().finally(() => {
+    btn.textContent = '✅ প্রবেশ করুন';
+    btn.disabled = false;
+
+    const admin = authData.admins.find(a => a.username === uname && a.password === pass);
+    if (admin) {
+      if (admin.suspended) {
+        errEl.textContent = '❌ আপনার account suspend করা হয়েছে।';
+        errEl.style.display = 'block';
+        return;
+      }
+      currentUser = { ...admin, role: admin.role || 'admin' };
+      saveSession(currentUser);
+      startApp();
+      return;
+    }
+    errEl.textContent = '❌ Username বা Password ভুল!';
+    errEl.style.display = 'block';
+  });
 }
 
 function startApp(fromSession = false) {
@@ -1028,7 +1068,6 @@ function showPage(name, el) {
 function updateDashboard() {
   let totalMembers = 0, totalCollected = 0, totalDuePeople = 0, totalDueAmt = 0;
   let grandTotalCollected = 0, grandTotalDue = 0, grandTotalMonths = 0, grandSurplus = 0;
-  let progressHTML = '';
 
   for (const [gid, g] of Object.entries(data.groups)) {
     const members = g.members;
@@ -1038,63 +1077,142 @@ function updateDashboard() {
     totalDuePeople += members.length - paid.length;
 
     members.forEach(m => {
-      // This month due
       totalDueAmt += getUnpaidMonths(m, g.rate).length * g.rate;
-      // Grand total: all payments ever made (past only, not advance)
       const nowKey = getMonthKey(currentYear, currentMonth);
       const pastPaid = (m.payments || []).filter(k => k <= nowKey);
       grandTotalCollected += pastPaid.length * g.rate;
       grandTotalMonths += pastPaid.length;
-      // Grand due: all unpaid past months
       grandTotalDue += getUnpaidMonths(m, g.rate).length * g.rate;
-      // Surplus
       grandSurplus += m.surplusBalance || 0;
     });
-
-    const pct = members.length > 0 ? (paid.length / members.length * 100) : 0;
-    progressHTML += `
-      <div class="card" style="margin-bottom:10px;">
-        <div class="card-title"><span style="width:10px;height:10px;border-radius:50%;background:${g.color};display:inline-block;"></span> ${g.name}</div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-          <span>${paid.length} জন দিয়েছেন</span>
-          <span>মোট ${members.length} জন</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill${pct < 50 ? ' danger' : ''}" style="width:${pct}%"></div></div>
-        <div style="font-size:11px;color:var(--gray);margin-top:6px;">এই মাসে আদায়: ₹${paid.length * g.rate}</div>
-      </div>`;
   }
 
   document.getElementById('total-members').textContent = totalMembers;
   document.getElementById('total-collected').textContent = '₹' + totalCollected;
   document.getElementById('total-due').textContent = totalDuePeople;
   document.getElementById('total-due-amount').textContent = '₹' + totalDueAmt;
-  document.getElementById('group-progress-cards').innerHTML = progressHTML;
-
-  // Grand total
   document.getElementById('grand-total-collected').textContent = '₹' + grandTotalCollected;
   document.getElementById('grand-total-due').textContent = '₹' + grandTotalDue;
   document.getElementById('grand-total-months').textContent = grandTotalMonths;
   document.getElementById('grand-surplus').textContent = '₹' + grandSurplus;
+}
 
-  const dueMembers = getAllMembers().filter(m => !hasPaidThisMonth(m));
-  const dueList = document.getElementById('due-list-dashboard');
-  if (dueMembers.length === 0) {
-    dueList.innerHTML = '<div class="empty-state"><div class="emoji">✅</div><p>সবাই এই মাসের টাকা দিয়েছেন! আলহামদুলিল্লাহ</p></div>';
-  } else {
-    dueList.innerHTML = dueMembers.map(m => {
-      const gid = getMemberGroup(m.id);
-      const g = data.groups[gid];
-      const canPay = currentUser.role === 'owner' || (currentUser.permissions && currentUser.permissions.payment);
-      return `<div class="member-item">
-        <div class="avatar due">${m.name.charAt(0)}</div>
-        <div class="member-info">
-          <div class="member-name">${m.name}</div>
-          <div class="member-sub">${g ? g.name : ''} • ${getUnpaidMonths(m, g ? g.rate : 0).length} মাস বাকি</div>
+// ========== DASHBOARD DETAIL MODAL ==========
+function openDashDetail(type) {
+  const title = document.getElementById('dash-detail-title');
+  const content = document.getElementById('dash-detail-content');
+  let html = '';
+
+  if (type === 'members') {
+    title.textContent = '👥 Group-wise সদস্য সংখ্যা';
+    html = Object.entries(data.groups).map(([gid, g]) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f5f5f5;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+        <div style="flex:1;font-size:14px;font-weight:600;">${g.name}</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green-dark);">${g.members.length} জন</div>
+      </div>`).join('');
+
+  } else if (type === 'collected') {
+    title.textContent = '💰 Group-wise এই মাসের আদায়';
+    html = Object.entries(data.groups).map(([gid, g]) => {
+      const paid = g.members.filter(m => hasPaidThisMonth(m));
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f5f5f5;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${g.name}</div>
+          <div style="font-size:11px;color:var(--gray);">${paid.length} জন দিয়েছেন / মোট ${g.members.length} জন</div>
         </div>
-        ${canPay ? `<button class="pay-btn" onclick="openPayModal('${gid}','${m.id}')">দিল</button>` : ''}
+        <div style="font-size:18px;font-weight:700;color:var(--gold);">₹${paid.length * g.rate}</div>
       </div>`;
     }).join('');
+
+  } else if (type === 'due-people') {
+    title.textContent = '⚠️ Group-wise বাকি সদস্য';
+    html = Object.entries(data.groups).map(([gid, g]) => {
+      const due = g.members.filter(m => !hasPaidThisMonth(m));
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f5f5f5;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${g.name}</div>
+          <div style="font-size:11px;color:var(--gray);">মোট ${g.members.length} জনের মধ্যে</div>
+        </div>
+        <div style="font-size:18px;font-weight:700;color:var(--red);">${due.length} জন</div>
+      </div>`;
+    }).join('');
+
+  } else if (type === 'due-amount') {
+    title.textContent = '💸 Group-wise মোট বাকি টাকা';
+    html = Object.entries(data.groups).map(([gid, g]) => {
+      let dueAmt = 0;
+      g.members.forEach(m => { dueAmt += getUnpaidMonths(m, g.rate).length * g.rate; });
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f5f5f5;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+        <div style="flex:1;font-size:14px;font-weight:600;">${g.name}</div>
+        <div style="font-size:18px;font-weight:700;color:#2980b9;">₹${dueAmt}</div>
+      </div>`;
+    }).join('');
+
+  } else if (type === 'grand-collected') {
+    title.textContent = '📈 Group-wise মোট আদায় (শুরু থেকে)';
+    const nowKey = getMonthKey(currentYear, currentMonth);
+    html = Object.entries(data.groups).map(([gid, g]) => {
+      let total = 0;
+      g.members.forEach(m => {
+        const pastPaid = (m.payments || []).filter(k => k <= nowKey);
+        total += pastPaid.length * g.rate;
+      });
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #f5f5f5;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${g.color};flex-shrink:0;"></div>
+        <div style="flex:1;font-size:14px;font-weight:600;">${g.name}</div>
+        <div style="font-size:18px;font-weight:700;color:var(--gold);">₹${total}</div>
+      </div>`;
+    }).join('');
+
+  } else if (type === 'grand-due') {
+    title.textContent = '⚠️ সব বকেয়া সদস্য (শুরু থেকে)';
+    // সব group-এর সব বকেয়া member — বেশি থেকে কম
+    let allDue = [];
+    for (const [gid, g] of Object.entries(data.groups)) {
+      g.members.forEach(m => {
+        const unpaid = getUnpaidMonths(m, g.rate);
+        if (unpaid.length > 0) {
+          allDue.push({ name: m.name, phone: m.phone, group: g.name, color: g.color, rate: g.rate, months: unpaid.length, amount: unpaid.length * g.rate, gid, id: m.id });
+        }
+      });
+    }
+    allDue.sort((a, b) => b.amount - a.amount);
+
+    if (allDue.length === 0) {
+      html = '<div style="text-align:center;color:var(--gray);padding:20px;">কেউ বকেয়া নেই! আলহামদুলিল্লাহ ✅</div>';
+    } else {
+      html = allDue.map((m, i) => {
+        const cleanPhone = (m.phone || '').replace(/\D/g,'').replace(/^0+/,'');
+        const waPhone = cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone;
+        const member = data.groups[m.gid].members.find(mem => mem.id === m.id);
+        const waMsg = buildPersonalMessage(member, m.rate);
+        const waUrl = m.phone ? `https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}` : null;
+        const medalColor = i === 0 ? '#dc2626' : i === 1 ? '#f59e0b' : i === 2 ? '#6b7280' : '#d1d5db';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+          <div style="width:26px;height:26px;border-radius:50%;background:${medalColor};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;">${i+1}</div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">${m.name}</div>
+            <div style="font-size:11px;color:var(--gray);">${m.group} • ${m.months} মাস বকেয়া</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div style="font-size:13px;font-weight:700;color:var(--red);">₹${m.amount}</div>
+            ${waUrl ? `<button onclick="window.open('${waUrl}','_blank')" style="background:#25D366;color:white;border:none;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;">📲 Reminder</button>` : '<span style="font-size:9px;color:var(--gray);">নম্বর নেই</span>'}
+          </div>
+        </div>`;
+      }).join('');
+    }
   }
+
+  content.innerHTML = html;
+  document.getElementById('dash-detail-modal').classList.add('open');
+}
+
+function closeDashDetail() {
+  document.getElementById('dash-detail-modal').classList.remove('open');
 }
 
 // ========== GROUP TABS ==========
@@ -1118,6 +1236,15 @@ function switchGroupTab(gid, el) {
   renderActiveGroup();
 }
 
+function canEditGroup(gid) {
+  if (currentUser.role === 'owner') return true;
+  const p = currentUser.permissions || {};
+  // Admin-এর assigned groups check করো
+  const assignedGroups = currentUser.groupAccess || [];
+  if (assignedGroups.length === 0) return true; // পুরনো admin — সব group
+  return assignedGroups.includes(gid);
+}
+
 function renderActiveGroup() {
   if (!activeGroupId || !data.groups[activeGroupId]) return;
   const g = data.groups[activeGroupId];
@@ -1130,8 +1257,10 @@ function renderActiveGroup() {
   });
   const container = document.getElementById('group-member-list');
   const isOwner = currentUser.role === 'owner';
-  const canPay = isOwner || (currentUser.permissions && currentUser.permissions.payment);
+  const hasGroupAccess = canEditGroup(activeGroupId);
+  const canPay = hasGroupAccess && (isOwner || (currentUser.permissions && currentUser.permissions.payment));
   const canDelete = isOwner;
+  const canEdit = hasGroupAccess && (isOwner || (currentUser.permissions && currentUser.permissions.payment));
 
   if (members.length === 0) {
     container.innerHTML = '<div class="empty-state"><div class="emoji">👥</div><p>কোনো সদস্য নেই।<br>Member ট্যাব থেকে যোগ করুন।</p></div>';
@@ -1143,7 +1272,6 @@ function renderActiveGroup() {
     const unpaid = getUnpaidMonths(m, g.rate).length;
     const badge = paid ? '<span class="badge badge-ok">✓ দিয়েছেন</span>' :
                  (unpaid > 1 ? `<span class="badge badge-due">${unpaid} মাস বাকি</span>` : '<span class="badge badge-due">বাকি</span>');
-    const canEdit = isOwner || (currentUser.permissions && currentUser.permissions.payment);
     return `<div class="member-item">
       <div class="avatar ${paid ? '' : 'due'}">${m.name.charAt(0)}</div>
       <div class="member-info" onclick="openDetailModal('${activeGroupId}','${m.id}')" style="cursor:pointer;">
@@ -1182,6 +1310,7 @@ let payingGroup = null, payingId = null, smartResult = null;
 function openPayModal(gid, id) {
   const canPay = currentUser.role === 'owner' || (currentUser.permissions && currentUser.permissions.payment);
   if (!canPay) { showToast('❌ আপনার Payment করার permission নেই।'); return; }
+  if (!canEditGroup(gid)) { showToast('❌ এই Group-এ Payment করার permission নেই।'); return; }
   payingGroup = gid;
   payingId = id;
   smartResult = null;
@@ -1450,6 +1579,9 @@ function addMember() {
 
   if (!name) { showToast('নাম দিন!'); return; }
   if (!gid) { showToast('Group বেছে নিন!'); return; }
+
+  // Group permission check
+  if (!canEditGroup(gid)) { showToast('❌ এই Group-এ Member যোগ করার permission নেই।'); return; }
 
   const member = { id: Date.now().toString(), name, phone, group: gid, startMonth, payments: [], addedOn: new Date().toISOString() };
   data.groups[gid].members.push(member);
@@ -1825,7 +1957,7 @@ function renderReport() {
   document.getElementById('rpt-total-months').textContent = totalMonths;
   document.getElementById('rpt-total-surplus').textContent = '₹' + totalSurplus;
 
-  // FIX 10: Group-wise Top 3 due
+  // Group-wise সব বকেয়া member — বেশি থেকে কম
   const topDueEl = document.getElementById('rpt-top-due');
   let topDueHTML = '';
   let anyDue = false;
@@ -1836,18 +1968,18 @@ function renderReport() {
       if (unpaid.length > 0) dueList.push({ name: m.name, phone: m.phone, gid, group: g.name, rate: g.rate, months: unpaid.length, amount: unpaid.length * g.rate, id: m.id });
     });
     dueList.sort((a, b) => b.amount - a.amount);
-    const top3 = dueList.slice(0, 3);
-    if (top3.length > 0) {
+    if (dueList.length > 0) {
       anyDue = true;
       topDueHTML += `<div style="margin-bottom:14px;">
-        <div style="font-size:13px;font-weight:700;color:var(--green-dark);padding:6px 10px;background:#f0fdf4;border-radius:8px;margin-bottom:8px;">📌 ${g.name}</div>
-        ${top3.map((m, i) => {
+        <div style="font-size:13px;font-weight:700;color:var(--green-dark);padding:6px 10px;background:#f0fdf4;border-radius:8px;margin-bottom:8px;">📌 ${g.name} — ${dueList.length} জন বকেয়া</div>
+        ${dueList.map((m, i) => {
           const cleanPhone = (m.phone || '').replace(/\D/g,'').replace(/^0+/,'');
           const waPhone = cleanPhone.startsWith('91') ? cleanPhone : '91' + cleanPhone;
           const waMsg = buildPersonalMessage(g.members.find(mem=>mem.id===m.id), g.rate);
           const waUrl = m.phone ? 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(waMsg) : null;
+          const medalColor = i === 0 ? '#dc2626' : i === 1 ? '#f59e0b' : i === 2 ? '#6b7280' : '#d1d5db';
           return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
-            <div style="width:28px;height:28px;border-radius:50%;background:${i===0?'#dc2626':i===1?'#f59e0b':'#6b7280'};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">${i+1}</div>
+            <div style="width:28px;height:28px;border-radius:50%;background:${medalColor};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;">${i+1}</div>
             <div style="flex:1;">
               <div style="font-size:14px;font-weight:600;">${m.name}</div>
               <div style="font-size:11px;color:var(--gray);">${m.phone ? '📱 ' + m.phone : 'নম্বর নেই'} • ${m.months} মাস বকেয়া</div>
